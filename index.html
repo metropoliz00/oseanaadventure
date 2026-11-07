@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ocean Adventure – Petualangan Bawah Laut</title>
+<style>
+:root{--navy:#063b63;--cyan:#20c7df;--aqua:#8ff3e8;--gold:#ffd45c;--ink:#08334f}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;color:white;background:#032d53;overflow-x:hidden}
+button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:14px;padding:11px 17px;font-weight:800;color:#073653;background:linear-gradient(#fff18c,#ffc94d);box-shadow:0 4px 0 #c58a25}
+button:disabled{opacity:.45;cursor:not-allowed}
+#app{min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#23c7e3 0,#0879a9 42%,#03436f 100%);position:relative;overflow:hidden}
+.bubbles{position:absolute;inset:0;pointer-events:none;opacity:.4;background-image:radial-gradient(circle at 12% 20%,#d5ffff 0 3px,transparent 4px),radial-gradient(circle at 84% 34%,#d5ffff 0 5px,transparent 6px),radial-gradient(circle at 35% 72%,#d5ffff 0 4px,transparent 5px),radial-gradient(circle at 70% 88%,#d5ffff 0 3px,transparent 4px);background-size:230px 260px;animation:drift 12s linear infinite}
+@keyframes drift{to{background-position:0 -520px}}
+header{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px clamp(12px,3vw,34px);background:#032e53cc;border-bottom:2px solid #ffffff30;flex-wrap:wrap}
+.brand{font-weight:1000;letter-spacing:.7px;font-size:clamp(16px,2.4vw,24px)}.brand span{color:#ffe17a}
+.stats{display:flex;gap:8px;flex-wrap:wrap}.stat{background:#ffffff20;border:1px solid #ffffff35;border-radius:12px;padding:7px 12px;font-weight:800;font-size:14px}
+main{position:relative;z-index:1;max-width:1200px;margin:auto;padding:18px}
+.panel{background:#eaffff;color:var(--ink);border:3px solid #fff;border-radius:24px;box-shadow:0 12px 30px #00233b66;padding:clamp(16px,3vw,28px)}
+.screen{display:none}.screen.active{display:block}
+h1,h2,h3{margin:0 0 12px}p{line-height:1.5}.muted{color:#477083}
+#startScreen{max-width:720px;margin:5vh auto;text-align:center}.hero{font-size:clamp(34px,6vw,64px);line-height:1.05;font-weight:1000;color:#075078;text-shadow:2px 3px 0 #b8f8ef;margin:10px 0}
+.subhero{font-weight:800;color:#1684a3}.formrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:20px 0}.formrow input{min-width:220px;padding:13px 15px;border:2px solid #83cbd7;border-radius:13px;color:#08334f}
+#missionScreen{max-width:900px;margin:2vh auto}.mission-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-top:18px}
+.mission{padding:18px 10px;border-radius:18px;text-align:center;background:#c9f3f4;border:2px solid #8ed5df;color:#075078;cursor:pointer;font-weight:900;transition:.2s}
+.mission:hover:not(.locked){transform:translateY(-4px);background:#fff0a8}.mission.locked{opacity:.5;cursor:not-allowed;filter:grayscale(.6)}.mission .big{font-size:30px;display:block}
+#gameScreen{max-width:1150px;margin:0 auto}.game-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;color:#fff}
+.question{background:#f4ffff;color:#06415e;border:3px solid #ffe17a;border-radius:18px;padding:13px 18px;font-weight:900;font-size:clamp(17px,2.3vw,23px);text-align:center;margin-bottom:12px;box-shadow:0 5px 0 #00517b}
+#arena{position:relative;height:min(58vh,510px);min-height:350px;border:4px solid #a9f6ee;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#32d5e5 0%,#1594bf 45%,#07527e 100%);box-shadow:inset 0 0 50px #003a6b80}
+#arena:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,#fff8 0,transparent 48%),linear-gradient(90deg,transparent 49%,#ffffff0a 50%,transparent 51%);pointer-events:none}
+.seafloor{position:absolute;bottom:0;height:55px;width:100%;background:linear-gradient(#d8c27a,#b68b4d);clip-path:polygon(0 35%,12% 10%,28% 38%,43% 15%,62% 45%,79% 12%,100% 30%,100% 100%,0 100%)}
+.coral{position:absolute;bottom:30px;font-size:clamp(35px,5vw,58px);filter:drop-shadow(0 4px 2px #003b5c66);animation:sway 3s ease-in-out infinite alternate}
+@keyframes sway{to{transform:rotate(7deg) translateY(-4px)}}
+.seaweed{position:absolute;bottom:30px;font-size:42px;opacity:.9}
+#diver{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);font-size:60px;z-index:5;filter:drop-shadow(0 5px 3px #00334f88);transition:left .08s,top .08s;user-select:none;pointer-events:none}
+#diver:after{content:"";position:absolute;width:12px;height:12px;background:#fff9;border-radius:50%;top:8px;right:-8px;box-shadow:15px -13px 0 -2px #fff8}
+.answer{position:absolute;z-index:4;min-width:100px;max-width:30%;padding:10px 9px;border-radius:17px;background:linear-gradient(#fff,#d7fbff);border:3px solid #fff;color:#075078;font-weight:1000;text-align:center;box-shadow:0 5px 0 #08769b;transform:translate(-50%,-50%);cursor:pointer;user-select:none;transition:transform .12s}
+.answer .creature{display:block;font-size:28px}.answer:hover{transform:translate(-50%,-50%) scale(1.08)}
+.hint{font-size:13px;color:#eaffff;text-align:center;margin:8px 0}
+.controls{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:10px}.controls button{font-size:14px}
+#videoWrap{position:fixed;right:12px;bottom:12px;width:180px;z-index:10;background:#042c4d;border:2px solid #a9f6ee;border-radius:14px;padding:6px;display:none;box-shadow:0 5px 20px #001d35aa}
+#videoWrap video{width:100%;border-radius:9px;transform:scaleX(-1)}#videoWrap small{display:block;text-align:center;font-size:11px;padding:3px}
+#toast{position:absolute;z-index:9;top:15px;left:50%;transform:translateX(-50%);background:#fff;color:#06415e;padding:10px 18px;border-radius:20px;font-weight:900;display:none;box-shadow:0 5px 20px #003b5c66;text-align:center;max-width:90%}
+#endScreen{max-width:760px;margin:5vh auto;text-align:center}.trophy{font-size:76px}
+.progress{height:12px;border-radius:20px;background:#b6e5e9;overflow:hidden;margin:8px 0 14px}.progress span{display:block;height:100%;background:linear-gradient(90deg,#17bfa9,#ffe16b);width:0;transition:width .3s}
+footer{text-align:center;color:#d5faff;font-size:12px;padding:14px}
+@media(max-width:600px){main{padding:10px}#arena{height:54vh;min-height:330px}.answer{min-width:82px;font-size:13px;padding:7px 5px}.answer .creature{font-size:23px}#diver{font-size:50px}#videoWrap{width:125px;right:6px;bottom:6px}}
+</style>
+</head>
+<body>
+<div id="app"><div class="bubbles"></div>
+<header><div class="brand">🌊 OCEAN <span>ADVENTURE</span></div><div class="stats"><div class="stat">🤿 <span id="playerLabel">Penyelam</span></div><div class="stat">⭐ <span id="scoreLabel">0</span></div><div class="stat">❤️ <span id="lifeLabel">3</span></div><div class="stat">⏱️ <span id="timeLabel">00:00</span></div></div></header>
+<main>
+<section id="startScreen" class="screen active panel">
+<div style="font-size:76px">🤿 🐠 🐙</div><div class="hero">OCEAN<br>ADVENTURE</div><div class="subhero">PETUALANGAN BAWAH LAUT</div>
+<p>Jadilah penyelam pemberani! Jelajahi samudra, kumpulkan jawaban yang tepat, dan selamatkan lautan dari kekacauan.</p>
+<div class="panel" style="padding:14px;background:#d9f7f6;border-color:#b0e8e7">
+<b>IDENTITAS PEMBELAJARAN</b><p id="identityText" style="margin:7px 0">Mata Pelajaran • Materi • Kelas</p>
+</div>
+<div class="formrow"><input id="studentName" maxlength="24" placeholder="Masukkan nama penyelam..." aria-label="Nama siswa"><button id="startBtn">MULAI PETUALANGAN 🚀</button></div>
+<small class="muted">Kontrol: kamera gesture, mouse, atau sentuhan layar.</small>
+</section>
+<section id="missionScreen" class="screen panel">
+<h2>🗺️ Peta Petualangan</h2><p class="muted">Selesaikan misi secara berurutan untuk membuka wilayah laut berikutnya.</p>
+<div class="progress"><span id="missionProgress"></span></div><div id="missionGrid" class="mission-grid"></div>
+<div class="controls"><button id="backHome">🏠 Beranda</button><button id="cameraMission">📷 Aktifkan Kamera</button></div>
+</section>
+<section id="gameScreen" class="screen">
+<div class="game-top"><b id="missionTitle">MISI 1</b><span id="questionCount">Pertanyaan 1/3</span><span id="levelTag">LOTS</span></div>
+<div class="question" id="questionText">Pertanyaan akan tampil di sini.</div>
+<div id="arena">
+<div class="coral" style="left:4%">🪸</div><div class="coral" style="right:6%;font-size:52px">🪸</div><div class="seaweed" style="left:25%">🌿</div><div class="seaweed" style="right:28%">🌿</div>
+<div class="seafloor"></div><div id="diver">🤿</div><div id="toast"></div>
+</div>
+<div class="hint" id="controlHint">Gerakkan kursor/tangan untuk mengarahkan penyelam. Sentuh objek jawaban yang benar!</div>
+<div class="controls"><button id="enableCamera">📷 Aktifkan Kamera</button><button id="pauseBtn">⏸️ Jeda</button><button id="exitBtn">🗺️ Peta Misi</button></div>
+</section>
+<section id="endScreen" class="screen panel">
+<div class="trophy">🏆</div><h1 id="endTitle">Petualangan Selesai!</h1><p id="endMessage"></p><h2 id="finalScore">0 POIN</h2>
+<div class="panel" style="background:#d9f7f6;border-color:#a4e2df"><h3>🌟 Apresiasi untuk <span id="endName"></span>!</h3><p id="praise"></p></div>
+<div class="controls"><button id="playAgain">🔁 Main Lagi</button><button id="endHome">🏠 Beranda</button></div>
+</section>
+</main><footer>OCEAN ADVENTURE • Belajar sambil bermain • Jaga laut kita! 🐬</footer>
+<div id="videoWrap"><video id="webcam" autoplay playsinline muted></video><small>Posisikan telapak tangan di depan kamera</small></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script>
+/* ============================================================
+   EDIT BAGIAN INI: identitas pembelajaran dan bank soal.
+   Setiap misi harus memiliki 3 soal; jawaban harus sama persis
+   dengan salah satu teks pada opsi.
+   ============================================================ */
+const GAME_CONFIG = {
+ subject: "Mata Pelajaran",
+ material: "Materi Pembelajaran",
+ grade: "Kelas ...",
+ missions: [
+  {title:"Teluk Terumbu Karang",questions:[
+   {level:"LOTS",q:"Contoh hewan yang hidup di laut adalah ...",options:["Ikan","Ayam","Kucing"],answer:"Ikan",explain:"Ikan hidup dan bernapas di lingkungan perairan."},
+   {level:"MOTS",q:"Jika ada 2 ikan lalu datang 3 ikan, jumlahnya menjadi ...",options:["4 ikan","5 ikan","6 ikan"],answer:"5 ikan",explain:"2 + 3 = 5 ikan."},
+   {level:"HOTS",q:"Terumbu karang rusak karena sampah. Tindakan terbaik adalah ...",options:["Membuang sampah lagi","Membersihkan sampah dan menjaga laut","Mengambil semua karang"],answer:"Membersihkan sampah dan menjaga laut",explain:"Menjaga kebersihan laut membantu melindungi ekosistem."}
+  ]},
+  {title:"Hutan Rumput Laut",questions:[
+   {level:"LOTS",q:"Tumbuhan laut yang bergoyang di dasar laut disebut ...",options:["Rumput laut","Pohon mangga","Padi"],answer:"Rumput laut",explain:"Rumput laut merupakan organisme yang hidup di perairan."},
+   {level:"MOTS",q:"Apa manfaat tumbuhan laut bagi ekosistem?",options:["Menjadi tempat hidup biota","Mengotori air","Menghilangkan semua ikan"],answer:"Menjadi tempat hidup biota",explain:"Tumbuhan laut menjadi habitat dan sumber makanan bagi biota."},
+   {level:"HOTS",q:"Air laut di sekitar pantai menjadi keruh akibat limbah. Apa langkah tepat?",options:["Membiarkan limbah","Melaporkan dan menghentikan sumber limbah","Menambah limbah"],answer:"Melaporkan dan menghentikan sumber limbah",explain:"Sumber pencemaran perlu dihentikan agar ekosistem pulih."}
+  ]},
+  {title:"Gua Harta Karun",questions:[
+   {level:"LOTS",q:"Alat untuk membantu penyelam melihat di tempat gelap adalah ...",options:["Senter selam","Payung","Kipas"],answer:"Senter selam",explain:"Senter selam membantu menerangi area bawah laut."},
+   {level:"MOTS",q:"Jika 10 kerang dibagi sama rata kepada 2 teman, setiap teman mendapat ...",options:["4 kerang","5 kerang","6 kerang"],answer:"5 kerang",explain:"10 dibagi 2 sama dengan 5."},
+   {level:"HOTS",q:"Kamu menemukan benda bersejarah di dasar laut. Apa yang sebaiknya dilakukan?",options:["Mengambil untuk dijual","Merusak benda itu","Melaporkan kepada pihak berwenang"],answer:"Melaporkan kepada pihak berwenang",explain:"Benda bersejarah perlu dilindungi dan ditangani oleh pihak berwenang."}
+  ]},
+  {title:"Samudra Ikan Warna-warni",questions:[
+   {level:"LOTS",q:"Hewan laut yang memiliki delapan lengan adalah ...",options:["Gurita","Penyu","Paus"],answer:"Gurita",explain:"Gurita dikenal memiliki delapan lengan."},
+   {level:"MOTS",q:"Urutan rantai makanan laut yang masuk akal adalah ...",options:["Fitoplankton → ikan kecil → ikan besar","Ikan besar → fitoplankton → ikan kecil","Batu → paus → rumput"],answer:"Fitoplankton → ikan kecil → ikan besar",explain:"Energi berpindah dari produsen ke konsumen."},
+   {level:"HOTS",q:"Populasi ikan kecil menurun tajam. Dampak yang mungkin terjadi adalah ...",options:["Pemangsa kekurangan makanan","Semua hewan bertambah","Laut berubah menjadi daratan"],answer:"Pemangsa kekurangan makanan",explain:"Penurunan mangsa dapat memengaruhi populasi pemangsanya."}
+  ]},
+  {title:"Misi Penyelamatan Samudra",questions:[
+   {level:"LOTS",q:"Sikap yang baik saat berada di pantai adalah ...",options:["Membuang sampah pada tempatnya","Membuang plastik ke laut","Menginjak terumbu karang"],answer:"Membuang sampah pada tempatnya",explain:"Sampah harus dikelola dengan benar."},
+   {level:"MOTS",q:"Ada 4 kelompok relawan. Setiap kelompok mengumpulkan 5 sampah. Total sampah terkumpul ...",options:["9","20","25"],answer:"20",explain:"4 × 5 = 20 sampah."},
+   {level:"HOTS",q:"Sekolah ingin mengurangi sampah plastik sekali pakai. Program paling efektif adalah ...",options:["Membagikan botol sekali pakai","Membawa botol minum dan wadah pakai ulang","Membakar plastik di halaman"],answer:"Membawa botol minum dan wadah pakai ulang",explain:"Menggunakan barang pakai ulang mengurangi sampah dari sumbernya."}
+  ]}
+ ]
+};
+
+const $=id=>document.getElementById(id);
+const screens=["startScreen","missionScreen","gameScreen","endScreen"];
+let player="Penyelam",score=0,lives=3,unlocked=1,currentMission=0,qIndex=0,paused=false,started=false;
+let startTime=0,elapsedBefore=0,timerId=null,objects=[],diver={x:50,y:57},raf=null,handX=null,handY=null;
+let cameraStream=null,mpCamera=null,hands=null,lastSpawn=0,answered=false,questionStart=0;
+const arena=$("arena");
+function show(id){screens.forEach(s=>$(s).classList.toggle("active",s===id))}
+function updateStats(){ $("scoreLabel").textContent=score;$("lifeLabel").textContent=lives;$("playerLabel").textContent=player;$("timeLabel").textContent=formatTime(Math.floor((Date.now()-startTime)/1000)+elapsedBefore);}
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function beep(freq=600,dur=.12){try{let c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=freq;g.gain.value=.08;o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);o.stop(c.currentTime+dur)}catch(e){}}
+function toast(msg){let t=$("toast");t.textContent=msg;t.style.display="block";clearTimeout(t._timer);t._timer=setTimeout(()=>t.style.display="none",1500)}
+function identity(){ $("identityText").textContent=GAME_CONFIG.subject+" • "+GAME_CONFIG.material+" • "+GAME_CONFIG.grade;}
+function startGame(){player=$("studentName").value.trim()||"Penyelam Hebat";$("playerLabel").textContent=player;score=0;lives=3;unlocked=1;elapsedBefore=0;startTime=Date.now();updateStats();identity();buildMissions();show("missionScreen")}
+function buildMissions(){let grid=$("missionGrid");grid.innerHTML="";GAME_CONFIG.missions.forEach((m,i)=>{let b=document.createElement("button");b.className="mission"+(i+1>unlocked?" locked":"");b.innerHTML=`<span class="big">${i+1>unlocked?"🔒":["🪸","🌿","💎","🐠","🌊"][i%5]}</span>MISI ${i+1}<br><small>${m.title}</small><br><small>${i+1>unlocked?"Terkunci":"3 pertanyaan"}</small>`;b.disabled=i+1>unlocked;b.onclick=()=>beginMission(i);grid.appendChild(b)});$("missionProgress").style.width=((unlocked-1)/GAME_CONFIG.missions.length*100)+"%"}
+function beginMission(i){currentMission=i;qIndex=0;show("gameScreen");$("missionTitle").textContent="MISI "+(i+1)+" • "+GAME_CONFIG.missions[i].title;nextQuestion()}
+function nextQuestion(){let qs=GAME_CONFIG.missions[currentMission].questions;if(qIndex>=qs.length){unlocked=Math.max(unlocked,currentMission+2);buildMissions();if(currentMission===GAME_CONFIG.missions.length-1){finish(true)}else{show("missionScreen");toast("Misi selesai! Wilayah berikutnya terbuka.");beep(880,.2)}return}
+answered=false;questionStart=Date.now();let q=qs[qIndex];$("questionText").textContent=q.q;$("questionCount").textContent="Pertanyaan "+(qIndex+1)+"/3";$("levelTag").textContent=q.level;objects=[];spawnAnswers(q);renderObjects();$("diver").style.left=diver.x+"%";$("diver").style.top=diver.y+"%";}
+function spawnAnswers(q){let positions=[18,50,82];let shuffled=q.options.map((v,i)=>({text:v,correct:v===q.answer,x:positions[i],y:27+Math.random()*45,emoji:["🐚","🐡","🫧"][i]}));objects=shuffled}
+function renderObjects(){arena.querySelectorAll(".answer").forEach(x=>x.remove());objects.forEach((o,i)=>{let el=document.createElement("div");el.className="answer";el.dataset.index=i;el.style.left=o.x+"%";el.style.top=o.y+"%";el.innerHTML=`<span class="creature">${o.emoji}</span>${escapeHtml(o.text)}`;el.addEventListener("click",()=>collect(i));arena.appendChild(el)})}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function moveDiver(x,y){if(!started||paused||!$("gameScreen").classList.contains("active"))return;diver.x=Math.max(7,Math.min(93,x));diver.y=Math.max(15,Math.min(82,y));$("diver").style.left=diver.x+"%";$("diver").style.top=diver.y+"%";checkCollision()}
+function checkCollision(){if(answered)return;objects.forEach((o,i)=>{if(Math.abs(o.x-diver.x)<9&&Math.abs(o.y-diver.y)<11)collect(i)})}
+function collect(i){if(answered||!objects[i])return;answered=true;let o=objects[i],q=GAME_CONFIG.missions[currentMission].questions[qIndex];if(o.correct){score+=100;toast("🎉 Tepat! +100 poin. "+q.explain);beep(820,.18)}else{lives--;toast("Belum tepat! "+q.explain);beep(180,.25)}updateStats();setTimeout(()=>{if(lives<=0){finish(false);return}qIndex++;nextQuestion()},1250)}
+function finish(won){started=false;cancelAnimationFrame(raf);show("endScreen");$("endName").textContent=player;$("finalScore").textContent=score+" POIN";$("endTitle").textContent=won?"SAMUDRA BERHASIL DISELAMATKAN!":"PETUALANGAN BERAKHIR";$("endMessage").textContent=won?"Hebat! Kamu menuntaskan seluruh 5 misi bawah laut.":"Jangan menyerah. Setiap percobaan membuatmu semakin hebat!";$("praise").textContent=won?player+", kamu adalah Penjaga Samudra sejati! Pengetahuan, ketelitian, dan semangatmu membantu menyelamatkan lautan.":"Terima kasih sudah berani mencoba, "+player+"! Terus belajar dan coba lagi untuk mendapatkan hasil yang lebih baik.";beep(won?950:250,.3)}
+function gameLoop(){if(!started)return;if(!paused){updateStats();if(handX!==null){moveDiver(handX,handY)}else{checkCollision()}}raf=requestAnimationFrame(gameLoop)}
+function togglePause(){paused=!paused;$("pauseBtn").textContent=paused?"▶️ Lanjut":"⏸️ Jeda";toast(paused?"Permainan dijeda":"Ayo lanjutkan!")}
+async function enableCamera(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error("Browser tidak mendukung akses kamera.");if(!window.Hands)throw new Error("MediaPipe belum termuat. Periksa koneksi internet.");if(cameraStream){toast("Kamera sudah aktif");return}
+cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480},audio:false});$("webcam").srcObject=cameraStream;$("videoWrap").style.display="block";
+hands=new Hands({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:.65,minTrackingConfidence:.6});hands.onResults(results=>{if(results.multiHandLandmarks&&results.multiHandLandmarks.length){let lm=results.multiHandLandmarks[0];let palmX=(lm[0].x+lm[5].x+lm[9].x+lm[13].x+lm[17].x)/5;let palmY=(lm[0].y+lm[5].y+lm[9].y+lm[13].y+lm[17].y)/5;handX=(1-palmX)*100;handY=palmY*100;$("controlHint").textContent="✋ Tangan terdeteksi! Geser telapak tangan untuk menggerakkan penyelam."}else{handX=null;$("controlHint").textContent="Tunjukkan telapak tangan ke kamera untuk menggerakkan penyelam."}});
+mpCamera=new Camera($("webcam"),{onFrame:async()=>{if(hands)await hands.send({image:$("webcam")})},width:640,height:480});mpCamera.start();toast("Kamera aktif! Gerakkan telapak tangan.");}
+catch(e){alert("Kamera belum dapat diaktifkan: "+e.message+"\nIzinkan akses kamera dan gunakan HTTPS atau localhost.");}}
+function stopCamera(){if(mpCamera){try{mpCamera.stop()}catch(e){}}if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}handX=null;handY=null;$("videoWrap").style.display="none"}
+$("startBtn").onclick=()=>{startGame();started=true;gameLoop()};
+$("backHome").onclick=()=>{show("startScreen");started=false};
+$("cameraMission").onclick=enableCamera;$("enableCamera").onclick=enableCamera;
+$("pauseBtn").onclick=togglePause;
+$("exitBtn").onclick=()=>{started=false;cancelAnimationFrame(raf);buildMissions();show("missionScreen")};
+$("playAgain").onclick=()=>{score=0;lives=3;unlocked=1;startTime=Date.now();elapsedBefore=0;updateStats();buildMissions();show("missionScreen");started=true;gameLoop()};
+$("endHome").onclick=()=>{show("startScreen");started=false};
+arena.addEventListener("pointermove",e=>{if(handX!==null)return;let r=arena.getBoundingClientRect();moveDiver((e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100)});
+arena.addEventListener("pointerdown",e=>{if(e.target.classList.contains("answer"))return;let r=arena.getBoundingClientRect();moveDiver((e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100)});
+document.addEventListener("keydown",e=>{if(!$("gameScreen").classList.contains("active"))return;let dx=0,dy=0;if(e.key==="ArrowLeft")dx=-5;if(e.key==="ArrowRight")dx=5;if(e.key==="ArrowUp")dy=-5;if(e.key==="ArrowDown")dy=5;if(dx||dy){e.preventDefault();moveDiver(diver.x+dx,diver.y+dy)}});
+$("studentName").addEventListener("keydown",e=>{if(e.key==="Enter")$("startBtn").click()});
+window.addEventListener("beforeunload",stopCamera);
+identity();
+</script>
+</body></html>
